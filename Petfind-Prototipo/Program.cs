@@ -5,7 +5,7 @@
     public string telefono;
     public string clave;
     public int petPoints;
-} 
+}
 
 struct Mascota
 {
