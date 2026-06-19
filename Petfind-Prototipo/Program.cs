@@ -203,6 +203,7 @@ void IniciarSesion()
         if (usuario == "" || clave == "")
         {
             MostrarError("Usuario y clave son requeridos.");
+            Thread.Sleep(1500);
             return;
         }
 
@@ -214,7 +215,6 @@ void IniciarSesion()
             {
                 usuarioExiste = true;
 
-          
                 if (usuarios[i].clave == clave)
                 {
                     MostrarExito($"\n¡Bienvenido de nuevo, {usuarios[i].nombre}!");
@@ -225,20 +225,24 @@ void IniciarSesion()
                 else
                 {
                     MostrarError("Acceso denegado: La contraseña no coincide con el usuario.");
-                    break;
                 }
+                Thread.Sleep(1500);
+                break;
             }
         }
         if (!usuarioExiste)
         {
             MostrarError("Acceso denegado: El usuario ingresado no está registrado en el sistema.");
+            Thread.Sleep(1500);
         }
     }
     catch (Exception ex)
     {
         MostrarError($"Error al iniciar sesión: {ex.Message}");
+        Thread.Sleep(1500);
     }
 }
+
 void Registrarse()
 {
     try
@@ -252,6 +256,7 @@ void Registrarse()
         if (nombre == "" || usuario == "" || telefono == "" || clave == "")
         {
             MostrarError("Todos los campos son requeridos. Intenta de nuevo.");
+            Thread.Sleep(500);
             return;
         }
 
