@@ -175,8 +175,6 @@ void IniciarSesion()
     string usuario = Console.ReadLine();
 
     Console.Write("Clave: ");
-    string clave = Console.ReadLine();
-
     if (usuario == "" || clave == "")
     {
         Console.WriteLine("Usuario y clave son requeridos.");
