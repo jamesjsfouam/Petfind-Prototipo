@@ -619,27 +619,7 @@ void billeteraPetPoints()
 
 void salirPrograma()
 {
-    try
-    {
-        Console.Clear();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("\n========================================");
-        Console.WriteLine("Gracias por usar Petfind.");
-        Console.WriteLine("¡Vuelve pronto!");
-        Console.WriteLine("========================================");
-        Console.ResetColor();
-
-        MostrarCarga(3);
-        Console.WriteLine();
-        sesionIniciada = false;
-        usuarioActivo = "";
-        menu = 5;
-        Console.Clear();
-    }
-    catch (Exception ex)
-    {
-        MostrarError($"Error al salir: {ex.Message}");
-    }
+    
 }
 
 void Main()
