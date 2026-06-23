@@ -1,4 +1,4 @@
-// Petfind - Prototipo 2
+// Petfind - Prototipo 3
 Usuario[] usuarios = new Usuario[100];
 Mascota[] mascotas = new Mascota[100];
 int totalMascotas = 0;
@@ -66,6 +66,26 @@ void MostrarAdvertencia(string mensaje)
     }
 }
 
+void MostrarEncabezado(string titulo, string instrucciones)
+{
+    Console.Clear();
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine($"========== {titulo} ==========");
+    Console.ResetColor();
+
+    if (instrucciones != "")
+    {
+        Console.WriteLine(instrucciones + "\n");
+    }
+}
+
+void PausarYContinuar()
+{
+    Console.WriteLine("\nPresiona Enter para continuar...");
+    Console.ReadLine();
+    Console.Clear();
+}
+
 string ObtenerEntrada(string prompt)
 {
     try
@@ -75,7 +95,7 @@ string ObtenerEntrada(string prompt)
             Console.Write(prompt);
             string entrada = Console.ReadLine() ?? "";
 
-            if (!string.IsNullOrWhiteSpace(entrada))
+            if (entrada != "")
             {
                 return entrada;
             }
@@ -98,32 +118,38 @@ void inicio()
     {
         while (sesionIniciada == false)
         {
-            Console.WriteLine("\n--- Bienvenido a Petfind ---");
-            Console.WriteLine("¿Deseas iniciar sesión o registrarte? (escribe: iniciar o registrar )");
+            MostrarEncabezado("BIENVENIDO A PETFIND", "");
+            Console.WriteLine("1. Iniciar sesión");
+            Console.WriteLine("2. Registrarse");
+            Console.WriteLine("3. Salir del programa");
+            Console.Write("\nSeleccione una opción (1-3): ");
+
             string opcion = Console.ReadLine() ?? "";
 
-            if (opcion == "registrar" || opcion == "1")
+            switch (opcion)
             {
-                Registrarse();
-                Console.Clear();
-            }
-            else if (opcion == "iniciar" || opcion == "2")
-            {
-                IniciarSesion();
-                Console.Clear();
-            }
-            else
-            {
-                MostrarError("Opción no válida.");
+                case "1":
+                    IniciarSesion();
+                    Console.Clear();
+                    break;
+                case "2":
+                    Registrarse();
+                    Console.Clear();
+                    break;
+                case "3":
+                    Console.WriteLine("Apagando el sistema PetFind...");
+                    Environment.Exit(0);
+                    break;
+                default:
+                    MostrarError("Opción no válida. Por favor, ingrese 1, 2 o 3.");
+                    MostrarCarga(2);
+                    break;
             }
         }
 
-        Console.Clear();
-        Console.WriteLine("\n========================================");
-        Console.WriteLine($"¡Has entrado al sistema principal, {usuarioActivo}!");
-        Console.WriteLine("========================================");
-
-        MostrarCarga(5);
+        MostrarEncabezado("SISTEMA PRINCIPAL", "");
+        Console.WriteLine($"¡Has entrado exitosamente, {usuarioActivo}!");
+        MostrarCarga(4);
         Console.Clear();
     }
     catch (Exception ex)
@@ -138,17 +164,26 @@ void menuPrincipal()
     {
         do
         {
-            Console.WriteLine(" --  Menu  -- ");
-            Console.WriteLine("1. Registrar mascota\n2. Reportar mascota desaparecida\n3. Reportes de desaparecidos\n4. Cartera de petpoints\n5. Salir");
+            Console.WriteLine(" --  Menu Principal  -- ");
+            Console.WriteLine("1. Registrar mascota");
+            Console.WriteLine("2. Historial Médico y Citas Veterinarias");
+            Console.WriteLine("3. Reportar mascota desaparecida / encontrada");
+            Console.WriteLine("4. Reportes de desaparecidos (Público)");
+            Console.WriteLine("5. Cartera de PetPoints");
+            Console.WriteLine("6. Exportar Base de Datos a CSV");
+            Console.WriteLine("7. Cerrar Sesión");
             Console.Write("\nIngrese la opcion a realizar: ");
-            if (int.TryParse(Console.ReadLine(), out menu))
-            {
 
+            string entrada = Console.ReadLine() ?? "";
+
+            if (int.TryParse(entrada, out menu))
+            {
+                // Opción válida
             }
             else
             {
-                MostrarError("Ha ingresado una opcion invalida. Ingrese un numero del 1 al 5");
-                MostrarCarga(5);
+                MostrarError("Ha ingresado una opcion invalida. Ingrese un numero del 1 al 7");
+                MostrarCarga(4);
                 Console.Clear();
                 continue;
             }
@@ -158,32 +193,33 @@ void menuPrincipal()
                 case 1:
                     registroMascota();
                     break;
-
                 case 2:
+                    historialMedico();
+                    break;
+                case 3:
                     reportarMascotaDesaparecida();
                     break;
-
-                case 3:
+                case 4:
                     mascotasDesaparecidas();
                     break;
-
-                case 4:
+                case 5:
                     billeteraPetPoints();
                     break;
-
-                case 5:
+                case 6:
+                    exportarDatosCSV();
+                    break;
+                case 7:
                     salirPrograma();
                     break;
-
                 default:
                     Console.Clear();
-                    MostrarError("Ha ingresado una opcion invalida. Por favor, ingrese un numero del 1 al 5.");
-                    MostrarCarga(5);
+                    MostrarError("Ha ingresado una opcion invalida. Por favor, ingrese un numero del 1 al 7.");
+                    MostrarCarga(4);
                     Console.Clear();
                     break;
             }
 
-        } while (menu != 5);
+        } while (menu != 7);
     }
     catch (Exception ex)
     {
@@ -191,20 +227,31 @@ void menuPrincipal()
     }
 }
 
-
 void IniciarSesion()
 {
     try
     {
-        Console.WriteLine("\n--- Iniciar Sesión ---");
-        string usuario = ObtenerEntrada("Usuario: ");
-        string clave = ObtenerEntrada("Clave: ");
+        MostrarEncabezado("INICIAR SESIÓN", "Instrucciones: Escribe '<' para retroceder un campo, o '/' para salir al inicio.");
 
-        if (usuario == "" || clave == "")
+        string usuario = "", clave = "";
+        int paso = 1;
+
+        while (paso <= 2)
         {
-            MostrarError("Usuario y clave son requeridos.");
-            Thread.Sleep(1500);
-            return;
+            if (paso == 1)
+            {
+                usuario = ObtenerEntrada("Usuario: ");
+                if (usuario == "/") return;
+                if (usuario == "<") { MostrarAdvertencia("Estás en el primer campo, no puedes retroceder."); continue; }
+                paso = 2;
+            }
+            else if (paso == 2)
+            {
+                clave = ObtenerEntrada("Clave: ");
+                if (clave == "/") return;
+                if (clave == "<") { paso = 1; continue; }
+                paso = 3;
+            }
         }
 
         bool usuarioExiste = false;
@@ -226,20 +273,21 @@ void IniciarSesion()
                 {
                     MostrarError("Acceso denegado: La contraseña no coincide con el usuario.");
                 }
-                Thread.Sleep(1500);
+                MostrarCarga(4);
                 break;
             }
         }
-        if (!usuarioExiste)
+
+        if (usuarioExiste == false)
         {
             MostrarError("Acceso denegado: El usuario ingresado no está registrado en el sistema.");
-            Thread.Sleep(1500);
+            MostrarCarga(4);
         }
     }
     catch (Exception ex)
     {
         MostrarError($"Error al iniciar sesión: {ex.Message}");
-        Thread.Sleep(1500);
+        MostrarCarga(4);
     }
 }
 
@@ -247,17 +295,59 @@ void Registrarse()
 {
     try
     {
-        Console.WriteLine("\n--- Registro ---");
-        string nombre = ObtenerEntrada("Nombre completo: ");
-        string usuario = ObtenerEntrada("Nombre de usuario: ");
-        string telefono = ObtenerEntrada("Teléfono: ");
-        string clave = ObtenerEntrada("Clave: ");
+        MostrarEncabezado("REGISTRO DE CUENTA NUEVA", "Instrucciones: Escribe '<' para retroceder un campo, o '/' para salir al inicio.");
 
-        if (nombre == "" || usuario == "" || telefono == "" || clave == "")
+        string nombre = "", usuario = "", telefono = "", clave = "";
+        int paso = 1;
+
+        while (paso <= 4)
         {
-            MostrarError("Todos los campos son requeridos. Intenta de nuevo.");
-            Thread.Sleep(500);
-            return;
+            if (paso == 1)
+            {
+                nombre = ObtenerEntrada("Nombre completo: ");
+                if (nombre == "/") return;
+                if (nombre == "<") { MostrarAdvertencia("Estás en el primer campo."); continue; }
+                paso = 2;
+            }
+            else if (paso == 2)
+            {
+                usuario = ObtenerEntrada("Nombre de usuario: ");
+                if (usuario == "/") return;
+                if (usuario == "<") { paso = 1; continue; }
+
+                bool usuarioDuplicado = false;
+                for (int i = 0; i < totalUsuarios; i++)
+                {
+                    if (usuarios[i].usuario == usuario)
+                    {
+                        usuarioDuplicado = true;
+                        break;
+                    }
+                }
+
+                if (usuarioDuplicado == true)
+                {
+                    MostrarError("Ese nombre de usuario ya está en uso. Por favor, elige otro.");
+                    MostrarCarga(4);
+                    continue;
+                }
+
+                paso = 3;
+            }
+            else if (paso == 3)
+            {
+                telefono = ObtenerEntrada("Teléfono: ");
+                if (telefono == "/") return;
+                if (telefono == "<") { paso = 2; continue; }
+                paso = 4;
+            }
+            else if (paso == 4)
+            {
+                clave = ObtenerEntrada("Clave: ");
+                if (clave == "/") return;
+                if (clave == "<") { paso = 3; continue; }
+                paso = 5;
+            }
         }
 
         Usuario nuevoUsuario = new Usuario
@@ -274,10 +364,12 @@ void Registrarse()
             usuarios[totalUsuarios] = nuevoUsuario;
             totalUsuarios++;
             MostrarExito("¡Registro exitoso! Ahora puedes iniciar sesión.");
+            MostrarCarga(4);
         }
         else
         {
             MostrarAdvertencia("No hay espacio para más usuarios.");
+            MostrarCarga(4);
         }
     }
     catch (Exception ex)
@@ -286,7 +378,6 @@ void Registrarse()
     }
 }
 
-
 void registroMascota()
 {
     try
@@ -294,25 +385,80 @@ void registroMascota()
         bool otraMascota = false;
         do
         {
-            bool mascotaAdicional = false;
-            string registrarMascotaAdicional = "";
-            Console.Clear();
-            MostrarAdvertencia("   -- Registraremos su mascota  --  ");
+            MostrarEncabezado("REGISTRAREMOS SU MASCOTA", "Instrucciones: Escribe '<' para retroceder un campo, o '/' para cancelar y volver al menú.");
 
-            string nombre = ObtenerEntrada("Nombre de su mascota: ");
-            string especie = ObtenerEntrada("Especie: ");
-            string raza = ObtenerEntrada("Raza: ");
-            string color = ObtenerEntrada("Color de pelaje: ");
+            string nombre = "", especie = "", raza = "", color = "", sangre = "", vacunas = "", alergias = "", condicion = "", rasgoCaracteristico = "";
+            int paso = 1;
 
-            Console.WriteLine(" - Información médica - ");
+            while (paso <= 9)
+            {
+                if (paso == 1)
+                {
+                    nombre = ObtenerEntrada("Nombre de su mascota: ");
+                    if (nombre == "/") return;
+                    if (nombre == "<") { MostrarAdvertencia("Estás en el primer campo."); continue; }
+                    paso = 2;
+                }
+                else if (paso == 2)
+                {
+                    especie = ObtenerEntrada("Especie: ");
+                    if (especie == "/") return;
+                    if (especie == "<") { paso = 1; continue; }
+                    paso = 3;
+                }
+                else if (paso == 3)
+                {
+                    raza = ObtenerEntrada("Raza: ");
+                    if (raza == "/") return;
+                    if (raza == "<") { paso = 2; continue; }
+                    paso = 4;
+                }
+                else if (paso == 4)
+                {
+                    color = ObtenerEntrada("Color de pelaje: ");
+                    if (color == "/") return;
+                    if (color == "<") { paso = 3; continue; }
+                    paso = 5;
+                }
+                else if (paso == 5)
+                {
+                    Console.WriteLine("\n - Información médica inicial - ");
+                    sangre = ObtenerEntrada("Tipo de sangre: ");
+                    if (sangre == "/") return;
+                    if (sangre == "<") { paso = 4; continue; }
+                    paso = 6;
+                }
+                else if (paso == 6)
+                {
+                    vacunas = ObtenerEntrada("Vacunas colocadas: ");
+                    if (vacunas == "/") return;
+                    if (vacunas == "<") { paso = 5; continue; }
+                    paso = 7;
+                }
+                else if (paso == 7)
+                {
+                    alergias = ObtenerEntrada("Alergias: ");
+                    if (alergias == "/") return;
+                    if (alergias == "<") { paso = 6; continue; }
+                    paso = 8;
+                }
+                else if (paso == 8)
+                {
+                    condicion = ObtenerEntrada("Condición especial: ");
+                    if (condicion == "/") return;
+                    if (condicion == "<") { paso = 7; continue; }
+                    paso = 9;
+                }
+                else if (paso == 9)
+                {
+                    rasgoCaracteristico = ObtenerEntrada("Algún rasgo físico característico: ");
+                    if (rasgoCaracteristico == "/") return;
+                    if (rasgoCaracteristico == "<") { paso = 8; continue; }
+                    paso = 10;
+                }
+            }
 
-            string sangre = ObtenerEntrada("Tipo de sangre: ");
-            string vacunas = ObtenerEntrada("Vacunas colocadas: ");
-            string alergias = ObtenerEntrada("Alergias: ");
-            string condicion = ObtenerEntrada("Condición especial: ");
-            string rasgoCaracteristico = ObtenerEntrada("Algún rasgo físico característico: ");
-
-            MostrarAdvertencia("\nRegistrando su mascota");
+            MostrarAdvertencia("\nRegistrando su mascota...");
 
             Mascota nuevaMascota = new Mascota
             {
@@ -327,6 +473,7 @@ void registroMascota()
                 vacunas = vacunas,
                 condicion = condicion,
                 rasgoCaracteristico = rasgoCaracteristico,
+                citasMedicas = "Sin citas registradas aún.",
                 extraviada = false
             };
 
@@ -340,11 +487,14 @@ void registroMascota()
                 MostrarAdvertencia("La base de datos de mascotas esta llena.");
             }
 
-            MostrarCarga(5);
+            MostrarCarga(4);
             Console.Clear();
             MostrarExito("Mascota registrada satisfactoriamente.");
-            Thread.Sleep(600);
+            MostrarCarga(2);
             Console.Clear();
+
+            bool mascotaAdicional = false;
+            string registrarMascotaAdicional = "";
 
             do
             {
@@ -358,7 +508,7 @@ void registroMascota()
                 else
                 {
                     MostrarError("Ha ingresado una opcion invalida.");
-                    MostrarCarga(5);
+                    MostrarCarga(4);
                     Console.Clear();
                 }
 
@@ -367,14 +517,11 @@ void registroMascota()
             if (registrarMascotaAdicional == "si")
             {
                 otraMascota = true;
-                MostrarAdvertencia("Se registrara una nueva mascota");
-                MostrarCarga(5);
-                Console.Clear();
             }
-            else if (registrarMascotaAdicional == "no")
+            else
             {
                 MostrarAdvertencia("Volviendo al menu principal");
-                MostrarCarga(5);
+                MostrarCarga(4);
                 otraMascota = false;
                 Console.Clear();
             }
@@ -387,40 +534,186 @@ void registroMascota()
     }
 }
 
-void reportarMascotaDesaparecida()
+void historialMedico()
 {
     try
     {
-        Console.Clear();
-        Console.ForegroundColor = ConsoleColor.DarkCyan;
-        Console.WriteLine("========== REPORTAR MASCOTA DESAPARECIDA ==========");
-        Console.ResetColor();
+        MostrarEncabezado("EXPEDIENTE MÉDICO Y CITAS", "Instrucciones: Escribe '/' para regresar al menú principal.");
 
         bool tienemascotas = false;
-        Console.WriteLine("\nTus mascotas registradas: ");
+        Console.WriteLine("Tus mascotas registradas: ");
         for (int i = 0; i < totalMascotas; i++)
         {
             if (mascotas[i].duenoUsuario == usuarioActivo)
             {
                 tienemascotas = true;
-                string estado = mascotas[i].extraviada ? "[Desaparecida]" : "[En casa]";
-                Console.WriteLine($"ID: {mascotas[i].id}");
-                Console.WriteLine($"Nombre: {mascotas[i].nombre}");
-                Console.WriteLine($"Especie: {mascotas[i].especie}");
-                Console.WriteLine($"--> {estado} <--");
+                Console.WriteLine($"ID: {mascotas[i].id} | Nombre: {mascotas[i].nombre} | Especie: {mascotas[i].especie}");
             }
         }
-        if (!tienemascotas)
+
+        if (tienemascotas == false)
         {
-            MostrarAdvertencia("\nNo tienes mascotas registradas.");
-            Console.WriteLine("Presiona cualquier boton para continuar");
-            Console.ReadKey();
-            Console.Clear();
+            MostrarAdvertencia("\nNo tienes mascotas registradas para ver su historial.");
+            PausarYContinuar();
             return;
         }
 
-        Console.WriteLine("\nIngrese el id de la mascota que desea reportar como desaparecida o 0 para cancelar");
-        if (int.TryParse(Console.ReadLine(), out int idMascota) && idMascota != 0)
+        Console.WriteLine("\nIngrese el ID de la mascota que desea consultar, o '/' para volver");
+        string entrada = Console.ReadLine() ?? "";
+
+        if (entrada == "/") return;
+
+        if (int.TryParse(entrada, out int idMascota))
+        {
+            bool mascotaEncontrada = false;
+
+            for (int i = 0; i < totalMascotas; i++)
+            {
+                if (mascotas[i].id == idMascota && mascotas[i].duenoUsuario == usuarioActivo)
+                {
+                    mascotaEncontrada = true;
+
+                    int opcionActualizar = 0;
+                    while (opcionActualizar != 5)
+                    {
+                        MostrarEncabezado($"HISTORIAL DE {mascotas[i].nombre.ToUpper()}", "");
+
+                        Console.WriteLine($"Tipo de Sangre: {mascotas[i].sangre}");
+                        Console.WriteLine($"Vacunas: {mascotas[i].vacunas}");
+                        Console.WriteLine($"Alergias: {mascotas[i].alergias}");
+                        Console.WriteLine($"Condiciones Especiales: {mascotas[i].condicion}");
+
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("\n--- REGISTRO DE CITAS VETERINARIAS ---");
+                        Console.ResetColor();
+                        Console.WriteLine(mascotas[i].citasMedicas);
+                        Console.WriteLine("--------------------------------------------------");
+
+                        Console.WriteLine("\n¿Qué dato médico desea agregar o actualizar?");
+                        Console.WriteLine("1. Agregar nueva vacuna");
+                        Console.WriteLine("2. Agregar nueva alergia");
+                        Console.WriteLine("3. Agregar nueva condición médica");
+                        Console.WriteLine("4. Agregar CITA VETERINARIA");
+                        Console.WriteLine("5. Volver al menú principal");
+                        Console.Write("Seleccione una opción (1-5): ");
+
+                        string entradaSub = Console.ReadLine() ?? "";
+                        if (int.TryParse(entradaSub, out opcionActualizar))
+                        {
+                            if (opcionActualizar == 1)
+                            {
+                                string nuevaVacuna = ObtenerEntrada("Ingrese el nombre de la nueva vacuna: ");
+                                if (nuevaVacuna != "/" && nuevaVacuna != "<")
+                                {
+                                    mascotas[i].vacunas += " | " + nuevaVacuna;
+                                    MostrarExito("Historial de vacunas actualizado.");
+                                    MostrarCarga(3);
+                                }
+                            }
+                            else if (opcionActualizar == 2)
+                            {
+                                string nuevaAlergia = ObtenerEntrada("Ingrese la nueva alergia detectada: ");
+                                if (nuevaAlergia != "/" && nuevaAlergia != "<")
+                                {
+                                    mascotas[i].alergias += " | " + nuevaAlergia;
+                                    MostrarExito("Historial de alergias actualizado.");
+                                    MostrarCarga(3);
+                                }
+                            }
+                            else if (opcionActualizar == 3)
+                            {
+                                string nuevaCondicion = ObtenerEntrada("Ingrese la nueva condición médica: ");
+                                if (nuevaCondicion != "/" && nuevaCondicion != "<")
+                                {
+                                    mascotas[i].condicion += " | " + nuevaCondicion;
+                                    MostrarExito("Historial de condiciones actualizado.");
+                                    MostrarCarga(3);
+                                }
+                            }
+                            else if (opcionActualizar == 4)
+                            {
+                                Console.WriteLine("\n-- Nueva Cita Veterinaria --");
+                                string fecha = ObtenerEntrada("Fecha de la cita (ej. 25/10/2026): ");
+                                if (fecha != "/" && fecha != "<")
+                                {
+                                    string observacion = ObtenerEntrada("Observaciones del veterinario: ");
+                                    if (observacion != "/" && observacion != "<")
+                                    {
+                                        if (mascotas[i].citasMedicas == "Sin citas registradas aún.")
+                                        {
+                                            mascotas[i].citasMedicas = "";
+                                        }
+
+                                        mascotas[i].citasMedicas += $"\n> [{fecha}] Observaciones: {observacion}";
+                                        MostrarExito("Cita veterinaria agregada al expediente exitosamente.");
+                                        MostrarCarga(3);
+                                    }
+                                }
+                            }
+                            else if (opcionActualizar != 5)
+                            {
+                                MostrarError("Opción no válida.");
+                                MostrarCarga(3);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+
+            if (mascotaEncontrada == false)
+            {
+                MostrarError("\nID de mascota no encontrado o no te pertenece. Intenta de nuevo.");
+                PausarYContinuar();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        MostrarError($"Error en el historial médico: {ex.Message}");
+    }
+}
+
+void reportarMascotaDesaparecida()
+{
+    try
+    {
+        MostrarEncabezado("CAMBIAR ESTADO DE MASCOTA", "Instrucciones: Escribe '/' para regresar al menú principal.");
+
+        bool tienemascotas = false;
+        Console.WriteLine("Tus mascotas registradas: ");
+        for (int i = 0; i < totalMascotas; i++)
+        {
+            if (mascotas[i].duenoUsuario == usuarioActivo)
+            {
+                tienemascotas = true;
+
+                string estado = "En casa";
+                if (mascotas[i].extraviada == true)
+                {
+                    estado = "Desaparecida";
+                }
+
+                Console.WriteLine($"ID: {mascotas[i].id}");
+                Console.WriteLine($"Nombre: {mascotas[i].nombre}");
+                Console.WriteLine($"Especie: {mascotas[i].especie}");
+                Console.WriteLine($"--> Estado actual: {estado} <--");
+                Console.WriteLine("---------------------------------");
+            }
+        }
+        if (tienemascotas == false)
+        {
+            MostrarAdvertencia("\nNo tienes mascotas registradas.");
+            PausarYContinuar();
+            return;
+        }
+
+        Console.WriteLine("\nIngrese el ID de la mascota para cambiar su estado, 0 para cancelar o '/' para volver");
+        string entrada = Console.ReadLine() ?? "";
+
+        if (entrada == "/") return;
+
+        if (int.TryParse(entrada, out int idMascota) && idMascota != 0)
         {
             bool mascotasEncontrada = false;
 
@@ -429,27 +722,34 @@ void reportarMascotaDesaparecida()
                 if (mascotas[i].id == idMascota && mascotas[i].duenoUsuario == usuarioActivo)
                 {
                     mascotasEncontrada = true;
-                    mascotas[i].extraviada = true;
-                    mascotasExtraviadas++;
 
-                    MostrarExito($"\nMascota reportada como desaparecida exitosamente");
+                    if (mascotas[i].extraviada == false)
+                    {
+                        mascotas[i].extraviada = true;
+                        mascotasExtraviadas++;
+                        MostrarExito($"\n¡Mascota {mascotas[i].nombre} reportada como DESAPARECIDA exitosamente!");
+                    }
+                    else
+                    {
+                        mascotas[i].extraviada = false;
+                        mascotasExtraviadas--;
+                        MostrarExito($"\n¡Qué alegría! Mascota {mascotas[i].nombre} reportada como EN CASA exitosamente!");
+                    }
                     break;
                 }
             }
 
-            if (!mascotasEncontrada)
+            if (mascotasEncontrada == false)
             {
                 MostrarError("\nID de mascota no encontrado o no te pertenece. Intenta de nuevo.");
             }
 
-            Console.WriteLine("Presiona cualquier boton para continuar");
-            Console.ReadKey();
-            Console.Clear();
+            PausarYContinuar();
         }
     }
     catch (Exception ex)
     {
-        MostrarError($"Error al reportar mascota desaparecida: {ex.Message}");
+        MostrarError($"Error al actualizar el estado de la mascota: {ex.Message}");
     }
 }
 
@@ -457,25 +757,20 @@ void mascotasDesaparecidas()
 {
     try
     {
-        Console.Clear();
-        MostrarAdvertencia("Cargando mascotas desaparecidas");
-        MostrarCarga(5);
+        MostrarEncabezado("REPORTE PÚBLICO DE MASCOTAS", "Cargando mascotas desaparecidas...");
+        MostrarCarga(4);
         Console.Clear();
 
         if (mascotasExtraviadas == 0)
         {
-            Console.Clear();
-            MostrarExito("No hay mascotas desaparecidas reportadas\n\nVolviendo al menu");
-            MostrarCarga(5);
-            Console.Clear();
+            MostrarExito("\nNo hay mascotas desaparecidas reportadas. ¡Todos están en casa!");
         }
-        else if (mascotasExtraviadas >= 1)
+        else
         {
+            MostrarEncabezado("REPORTE PÚBLICO DE MASCOTAS", "");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Hay {mascotasExtraviadas} mascotas extraviadas: ");
+            Console.WriteLine($"Hay {mascotasExtraviadas} mascotas extraviadas: \n");
             Console.ResetColor();
-
-            MostrarExito("El listado de mascotas desaparecidas son: ");
 
             for (int i = 0; i < totalMascotas; i++)
             {
@@ -485,10 +780,8 @@ void mascotasDesaparecidas()
                     Console.WriteLine($" Rasgo característico: {mascotas[i].rasgoCaracteristico} - Dueño de mascota: {mascotas[i].duenoUsuario}\n");
                 }
             }
-            Console.WriteLine("Presiona cualquier boton para continuar");
-            Console.ReadKey();
-            Console.Clear();
         }
+        PausarYContinuar();
     }
     catch (Exception ex)
     {
@@ -500,16 +793,32 @@ void billeteraPetPoints()
 {
     try
     {
-        int puntosActuales = 500;
+        int indiceUsuario = 0;
+        for (int i = 0; i < totalUsuarios; i++)
+        {
+            if (usuarios[i].usuario == usuarioActivo)
+            {
+                indiceUsuario = i;
+                break;
+            }
+        }
+
         int opcion = 0;
 
         while (opcion != 4)
         {
-            Console.WriteLine("\n--- BIENVENIDO A BILLETERA PETPOINTS ---");
-            Console.WriteLine("\n1. Registrar (Ganar) puntos. \n 2. Canjear puntos PetFind \n 3. Ver Puntos Actuales. \n 4. Salir.");
-            Console.Write("Seleccione una opción (1-4): ");
+            MostrarEncabezado("BILLETERA PETPOINTS", "Instrucciones: Escribe '/' para regresar al menu principal");
+            Console.WriteLine("1. Registrar (Ganar) puntos");
+            Console.WriteLine("2. Canjear puntos PetFind");
+            Console.WriteLine("3. Ver Puntos Actuales");
+            Console.WriteLine("4. Salir");
+            Console.Write("\nSeleccione una opción (1-4): ");
 
-            if (int.TryParse(Console.ReadLine(), out opcion))
+            string entrada = Console.ReadLine() ?? "";
+
+            if (entrada == "/") return;
+
+            if (int.TryParse(entrada, out opcion))
             {
                 Console.WriteLine();
 
@@ -517,7 +826,7 @@ void billeteraPetPoints()
                 {
                     case 1:
                         Console.WriteLine("--- OPCIONES DE REGISTRO ---");
-                        Console.WriteLine("\n1. Registrar avistamiento de una mascota perdida (150 puntos). \n 2. Registrar una mascota encontrada e interceptada (300 puntos). \n 3. Volver al menú principal.");
+                        Console.WriteLine("\n1. Registrar avistamiento de una mascota perdida (150 puntos). \n2. Registrar una mascota encontrada e interceptada (300 puntos). \n3. Volver al menú de billetera.");
                         Console.Write("Seleccione una opción (1/2): ");
 
                         if (int.TryParse(Console.ReadLine(), out int tipoRegistro))
@@ -526,33 +835,30 @@ void billeteraPetPoints()
                             switch (tipoRegistro)
                             {
                                 case 1:
-                                    int RecompensaAvistamiento = 150;
-                                    puntosActuales = puntosActuales + RecompensaAvistamiento;
+                                    usuarios[indiceUsuario].petPoints += 150;
                                     MostrarExito("¡Gracias por tu reporte de avistamiento! Reporte procesado correctamente.");
-                                    Console.WriteLine($"Se ha sumado tu recompensa de {RecompensaAvistamiento} PetPoints.");
+                                    Console.WriteLine($"Se ha sumado tu recompensa de 150 PetPoints.");
                                     break;
-
                                 case 2:
-                                    int recompensaIntercepcion = 300;
-                                    puntosActuales = puntosActuales + recompensaIntercepcion;
+                                    usuarios[indiceUsuario].petPoints += 300;
                                     MostrarExito("¡Gracias por ayudar a la comunidad! Reporte procesado correctamente.");
-                                    Console.WriteLine($"Se ha sumado tu recompensa de {recompensaIntercepcion} PetPoints.");
+                                    Console.WriteLine($"Se ha sumado tu recompensa de 300 PetPoints.");
                                     break;
-
                                 default:
-                                    MostrarAdvertencia("Opción de registro no válida. Regresando al menú principal.");
+                                    MostrarAdvertencia("Opción de registro no válida. Regresando al menú de billetera.");
                                     break;
                             }
-
 
                             if (tipoRegistro == 1 || tipoRegistro == 2)
                             {
-                                Console.WriteLine($"Tu nuevo saldo es de: {puntosActuales} puntos.");
+                                Console.WriteLine($"Tu nuevo saldo es de: {usuarios[indiceUsuario].petPoints} puntos.");
                             }
+                            MostrarCarga(4);
                         }
                         else
                         {
                             MostrarError("\nError: Debe introducir un número entero (1 o 2) en el submenú.");
+                            MostrarCarga(4);
                         }
                         break;
 
@@ -567,18 +873,15 @@ void billeteraPetPoints()
                             switch (opcionServicio)
                             {
                                 case 1:
-                                    int costoServicio = 300;
-
-
-                                    if (puntosActuales >= costoServicio)
+                                    if (usuarios[indiceUsuario].petPoints >= 300)
                                     {
-                                        puntosActuales = puntosActuales - costoServicio;
+                                        usuarios[indiceUsuario].petPoints -= 300;
                                         MostrarExito("¡Solicitud procesada correctamente! Código de cupón generado.");
-                                        Console.WriteLine($"Saldo restante: {puntosActuales} puntos.");
+                                        Console.WriteLine($"Saldo restante: {usuarios[indiceUsuario].petPoints} puntos.");
                                     }
                                     else
                                     {
-                                        MostrarError($"Error: Saldo insuficiente en tu billetera PetPoints. Requieres {costoServicio} puntos y tienes {puntosActuales}.");
+                                        MostrarError($"Error: Saldo insuficiente en tu billetera PetPoints. Requieres 300 puntos y tienes {usuarios[indiceUsuario].petPoints}.");
                                     }
                                     break;
 
@@ -587,32 +890,38 @@ void billeteraPetPoints()
                                     break;
 
                                 default:
-                                    MostrarAdvertencia("Opcion no valida. Regresando al menu principal");
+                                    MostrarAdvertencia("Opcion no valida. Regresando al menu de billetera");
                                     break;
                             }
+                            MostrarCarga(4);
                         }
                         else
                         {
                             MostrarError("\nError: Debe introducir un número entero válido (1 o 2).");
+                            MostrarCarga(4);
                         }
                         break;
 
                     case 3:
-                        Console.WriteLine($"Tu saldo disponible es: {puntosActuales} PetPoints.");
+                        Console.WriteLine($"Tu saldo disponible es: {usuarios[indiceUsuario].petPoints} PetPoints.");
+                        PausarYContinuar();
                         break;
 
                     case 4:
-                        MostrarExito("Gracias por usar billetera PetFind. ¡Hasta luego!");
+                        MostrarExito("Gracias por usar billetera PetFind. ¡Regresando al menú principal!");
+                        MostrarCarga(3);
                         break;
 
                     default:
                         MostrarError("Opción no válida. Por favor, seleccione un número del 1 al 4.");
+                        MostrarCarga(3);
                         break;
                 }
             }
             else
             {
                 MostrarError("\nError: Entrada inválida. Por favor, digite un número del 1 al 4.");
+                MostrarCarga(3);
             }
         }
     }
@@ -622,23 +931,59 @@ void billeteraPetPoints()
     }
 }
 
+void exportarDatosCSV()
+{
+    try
+    {
+        MostrarEncabezado("EXPORTACIÓN DE DATOS", "Preparando la base de datos de mascotas para exportación...");
+        MostrarCarga(4);
+
+        StreamWriter archivoCSV = new StreamWriter("BaseDeDatos_Mascotas.csv");
+
+        archivoCSV.WriteLine("ID,Dueño,Nombre,Especie,Raza,Color,Sangre,Vacunas,Alergias,Condicion,Citas_Medicas,Estado");
+
+        for (int i = 0; i < totalMascotas; i++)
+        {
+            string estado = "En Casa";
+            if (mascotas[i].extraviada == true)
+            {
+                estado = "Desaparecida";
+            }
+
+            string citasLimpias = mascotas[i].citasMedicas.Replace("\n", " ");
+
+            archivoCSV.WriteLine($"{mascotas[i].id},{mascotas[i].duenoUsuario},{mascotas[i].nombre},{mascotas[i].especie},{mascotas[i].raza},{mascotas[i].color},{mascotas[i].sangre},{mascotas[i].vacunas},{mascotas[i].alergias},{mascotas[i].condicion},{citasLimpias},{estado}");
+        }
+
+        archivoCSV.Close();
+
+        MostrarEncabezado("EXPORTACIÓN DE DATOS", "");
+        MostrarExito("¡Datos guardados exitosamente!\n");
+        Console.WriteLine("Se ha creado el archivo 'BaseDeDatos_Mascotas.csv' en la carpeta de tu proyecto.");
+        Console.WriteLine("Puedes abrirlo directamente con Excel.");
+
+        PausarYContinuar();
+    }
+    catch (Exception ex)
+    {
+        MostrarError($"Error al exportar los datos: {ex.Message}");
+        PausarYContinuar();
+    }
+}
+
 void salirPrograma()
 {
     try
     {
-        Console.Clear();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("\n========================================");
-        Console.WriteLine("Gracias por usar Petfind.");
+        MostrarEncabezado("CERRANDO SESIÓN", "");
+        Console.WriteLine("Cerrando sesión actual en Petfind.");
         Console.WriteLine("¡Vuelve pronto!");
-        Console.WriteLine("========================================");
-        Console.ResetColor();
 
         MostrarCarga(3);
         Console.WriteLine();
         sesionIniciada = false;
         usuarioActivo = "";
-        menu = 5;
+        menu = 7;
         Console.Clear();
     }
     catch (Exception ex)
@@ -651,8 +996,14 @@ void Main()
 {
     try
     {
-        inicio();
-        menuPrincipal();
+        while (true)
+        {
+            inicio();
+            if (sesionIniciada == true)
+            {
+                menuPrincipal();
+            }
+        }
     }
     catch (Exception ex)
     {
@@ -684,5 +1035,6 @@ struct Mascota
     public string vacunas;
     public string condicion;
     public string rasgoCaracteristico;
+    public string citasMedicas;
     public bool extraviada;
 }
