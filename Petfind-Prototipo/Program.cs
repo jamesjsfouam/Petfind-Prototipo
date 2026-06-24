@@ -557,12 +557,15 @@ void historialMedico()
             PausarYContinuar();
             return;
         }
+        string entrada = ObtenerEntrada("\nIngrese el ID de la mascota que desea consultar, o '/' para volver: ");
 
-        Console.WriteLine("\nIngrese el ID de la mascota que desea consultar, o '/' para volver");
-        string entrada = Console.ReadLine() ?? "";
+        if (entrada == "/")
+        {
+            Console.Clear();
+            return;
+        }
 
-        if (entrada == "/") return;
-
+        Console.Clear();
         if (int.TryParse(entrada, out int idMascota))
         {
             bool mascotaEncontrada = false;
@@ -708,12 +711,19 @@ void reportarMascotaDesaparecida()
             return;
         }
 
-        Console.WriteLine("\nIngrese el ID de la mascota para cambiar su estado, 0 para cancelar o '/' para volver");
-        string entrada = Console.ReadLine() ?? "";
+        Console.WriteLine();
+        string entrada = ObtenerEntrada("Ingrese el ID de la mascota para cambiar su estado o '/' para volver: ");
 
-        if (entrada == "/") return;
+        if (entrada == "/")
+        {
+            Console.Clear();
+            Console.WriteLine("\nRegresando al menú principal...");
+            MostrarCarga(3);
+            Console.Clear();
+            return;
+        }
 
-        if (int.TryParse(entrada, out int idMascota) && idMascota != 0)
+        if (int.TryParse(entrada, out int idMascota))
         {
             bool mascotasEncontrada = false;
 
@@ -786,7 +796,7 @@ void mascotasDesaparecidas()
     catch (Exception ex)
     {
         MostrarError($"Error al mostrar mascotas desaparecidas: {ex.Message}");
-    }
+    }   
 }
 
 void billeteraPetPoints()
@@ -908,10 +918,11 @@ void billeteraPetPoints()
                         break;
 
                     case 4:
+                        Console.Clear();
                         MostrarExito("Gracias por usar billetera PetFind. ¡Regresando al menú principal!");
                         MostrarCarga(3);
+                        Console.Clear();
                         break;
-
                     default:
                         MostrarError("Opción no válida. Por favor, seleccione un número del 1 al 4.");
                         MostrarCarga(3);
